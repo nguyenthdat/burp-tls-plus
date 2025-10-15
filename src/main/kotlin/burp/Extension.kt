@@ -36,7 +36,7 @@ class Extension : BurpExtension {
             }
         }
 
-        api.userInterface().registerSuiteTab("TLS+",  SettingsTab(settings).ui);
+        api.userInterface().registerSuiteTab("TLS+", SettingsTab(settings))
 
 //        Thread(Runnable {
 //            val err: Unit /* TODO: class org.jetbrains.kotlin.nj2k.types.JKJavaNullPrimitiveType */? =

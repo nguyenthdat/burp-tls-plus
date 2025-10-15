@@ -4,85 +4,53 @@ import burp.api.montoya.MontoyaApi
 import burp.api.montoya.persistence.Preferences
 import uniffi.tlsplus.getFingerprints
 
+class Settings(private val prefs: Preferences) {
 
-class Settings(api: MontoyaApi) {
-    private val storage: Preferences
+    constructor(api: MontoyaApi) : this(api.persistence().preferences())
 
-    var spoofProxyAddress: String = "SpoofProxyAddress"
-        get() = this.read(field, DEFAULT_SPOOF_PROXY_ADDRESS)!!
-        set(spoofProxyAddress) {
-            this.write(field, spoofProxyAddress)
-        }
-    var interceptProxyAddress: String = "InterceptProxyAddress"
-        get() = this.read(field, DEFAULT_INTERCEPT_PROXY_ADDRESS)!!
-        set(interceptProxyAddress) {
-            this.write(field, interceptProxyAddress)
-        }
-    var burpProxyAddress: String = "BurpProxyAddress"
-        get() = this.read(field, DEFAULT_BURP_PROXY_ADDRESS)!!
-        set(burpProxyAddress) {
-            this.write(field, burpProxyAddress)
-        }
-    var fingerprint: String = "Fingerprint"
-        get() = this.read(field, DEFAULT_TLS_FINGERPRINT)!!
-        set(fingerprint) {
-            this.write(field, fingerprint)
-        }
-    var hexClientHello: String = "HexClientHello"
-        get() = this.read(field, "")!!
-        set(hexClientHello) {
-            this.write(field, hexClientHello)
-        }
-    var useInterceptedFingerprint: String = "UseInterceptedFingerprint"
+    var spoofProxyAddress: String
+        get() = prefs.getString(KEY_SPOOF_PROXY_ADDRESS).orEmpty().ifEmpty { DEFAULT_SPOOF_PROXY_ADDRESS }
+        set(value) { prefs.setString(KEY_SPOOF_PROXY_ADDRESS, value.trim()) }
 
-    var httpTimeout: String = "HttpTimeout"
+    var interceptProxyAddress: String
+        get() = prefs.getString(KEY_INTERCEPT_PROXY_ADDRESS).orEmpty().ifEmpty { DEFAULT_INTERCEPT_PROXY_ADDRESS }
+        set(value) { prefs.setString(KEY_INTERCEPT_PROXY_ADDRESS, value.trim()) }
 
+    var burpProxyAddress: String
+        get() = prefs.getString(KEY_BURP_PROXY_ADDRESS).orEmpty().ifEmpty { DEFAULT_BURP_PROXY_ADDRESS }
+        set(value) { prefs.setString(KEY_BURP_PROXY_ADDRESS, value.trim()) }
 
-    init {
-        this.storage = api.persistence().preferences()
-    }
+    var fingerprint: String
+        get() = prefs.getString(KEY_FINGERPRINT).orEmpty().ifEmpty { DEFAULT_TLS_FINGERPRINT }
+        set(value) { prefs.setString(KEY_FINGERPRINT, value) }
 
-    fun read(key: String?, defaultValue: String?): String? {
-        val value = this.storage.getString(key)
-        if (value == null || value.isEmpty()) {
-            this.write(key, defaultValue)
-            return defaultValue
-        }
-        return value
-    }
+    var hexClientHello: String?
+        get() = prefs.getString(KEY_HEX_CLIENT_HELLO)?.takeIf { it.isNotEmpty() }
+        set(value) { prefs.setString(KEY_HEX_CLIENT_HELLO, value ?: "") }
 
-    fun write(key: String?, value: String?) {
-        this.storage.setString(key, value)
-    }
+    var useInterceptedFingerprint: Boolean
+        get() = prefs.getBoolean(KEY_USE_INTERCEPTED_FINGERPRINT) ?: false
+        set(value) { prefs.setBoolean(KEY_USE_INTERCEPTED_FINGERPRINT, value) }
 
-    fun write(key: String?, value: Boolean) {
-        this.storage.setBoolean(key, value)
-    }
+    var httpTimeout: Int
+        get() = (prefs.getInteger(KEY_HTTP_TIMEOUT) ?: DEFAULT_HTTP_TIMEOUT)
+        set(value) { prefs.setInteger(KEY_HTTP_TIMEOUT, value.coerceIn(1, 300)) }
 
-    fun write(key: String?, value: Int) {
-        this.storage.setInteger(key, value)
-    }
-
-    val fingerprints: List<String>
-        get() = getFingerprints()
-
-    fun toTransportConfig(): TransportConfig {
-        val transportConfig = TransportConfig()
-        transportConfig.Fingerprint = this.fingerprint
-        transportConfig.HexClientHello = this.hexClientHello
-        transportConfig.HttpTimeout = 30
-        transportConfig.UseInterceptedFingerprint = false
-        transportConfig.BurpAddr = this.burpProxyAddress
-        transportConfig.InterceptProxyAddr = this.interceptProxyAddress
-        return transportConfig
-    }
+    val fingerprints: List<String> get() = getFingerprints()
 
     companion object {
-        const val DEFAULT_SPOOF_PROXY_ADDRESS: String = "127.0.0.1:8887"
-        const val DEFAULT_INTERCEPT_PROXY_ADDRESS: String = "127.0.0.1:8886"
-        const val DEFAULT_BURP_PROXY_ADDRESS: String = "127.0.0.1:8080"
-        const val DEFAULT_HTTP_TIMEOUT: Int = 30
-        const val DEFAULT_TLS_FINGERPRINT: String = "default"
-        const val USE_INTERCEPTED_FINGERPRINT: Boolean = false
+        private const val KEY_SPOOF_PROXY_ADDRESS = "SpoofProxyAddress"
+        private const val KEY_INTERCEPT_PROXY_ADDRESS = "InterceptProxyAddress"
+        private const val KEY_BURP_PROXY_ADDRESS = "BurpProxyAddress"
+        private const val KEY_FINGERPRINT = "Fingerprint"
+        private const val KEY_HEX_CLIENT_HELLO = "HexClientHello"
+        private const val KEY_USE_INTERCEPTED_FINGERPRINT = "UseInterceptedFingerprint"
+        private const val KEY_HTTP_TIMEOUT = "HttpTimeout"
+
+        const val DEFAULT_SPOOF_PROXY_ADDRESS = "127.0.0.1:8887"
+        const val DEFAULT_INTERCEPT_PROXY_ADDRESS = "127.0.0.1:8886"
+        const val DEFAULT_BURP_PROXY_ADDRESS = "127.0.0.1:8080"
+        const val DEFAULT_HTTP_TIMEOUT = 30
+        const val DEFAULT_TLS_FINGERPRINT = "default"
     }
 }
