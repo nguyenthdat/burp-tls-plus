@@ -4,3 +4,6 @@
 # Ignore Gradle build output directory
 build
 /target
+.vscode
+.idea
+.DS_Store
