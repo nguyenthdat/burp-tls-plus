@@ -15,7 +15,6 @@ ext {
     libBaseName = 'tlsplus'
     rustProjectDir = project.hasProperty('rustProjectDir') ? file(project.property('rustProjectDir')) : project.projectDir
     nativeTargetDir = new File(rustProjectDir, 'target/release')
-    generatedKotlinDir = file("src/main/kotlin/")
 }
 
 def libFileName = (isWindows ? "${libBaseName}.dll" : (isMac ? "lib${libBaseName}.dylib" : "lib${libBaseName}.so"))
@@ -63,8 +62,7 @@ tasks.register('generateUniFFI', Exec) {
     doFirst {
         commandLine 'cargo', 'run', '-p', 'uniffi-bindgen', '--',
                     'generate', '--library', libPath.absolutePath,
-                    '--language', 'kotlin', '--out-dir', generatedKotlinDir.absolutePath, '--no-format'
-
+                    '--language', 'kotlin', '--out-dir', 'src/main/kotlin/', '--no-format'
     }
 }
 

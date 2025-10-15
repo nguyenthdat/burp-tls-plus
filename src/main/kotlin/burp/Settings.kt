@@ -2,9 +2,11 @@ package burp
 
 import burp.api.montoya.MontoyaApi
 import burp.api.montoya.persistence.Preferences
+import uniffi.tlsplus.getFingerprints
+
 
 class Settings(api: MontoyaApi) {
-    private val storage: Preferences = api.persistence().preferences()
+    private val storage: Preferences
 
     var spoofProxyAddress: String = "SpoofProxyAddress"
         get() = this.read(field, DEFAULT_SPOOF_PROXY_ADDRESS)!!
@@ -32,38 +34,18 @@ class Settings(api: MontoyaApi) {
             this.write(field, hexClientHello)
         }
     var useInterceptedFingerprint: String = "UseInterceptedFingerprint"
-        get() = this.read(field, USE_INTERCEPTED_FINGERPRINT)
-        set(useInterceptedFingerprint) {
-            this.write(field, useInterceptedFingerprint)
-        }
+
     var httpTimeout: String = "HttpTimeout"
-        get() = this.read(field, DEFAULT_HTTP_TIMEOUT)
-        set(httpTimeout) {
-            this.write(field, httpTimeout)
-        }
+
+
+    init {
+        this.storage = api.persistence().preferences()
+    }
 
     fun read(key: String?, defaultValue: String?): String? {
         val value = this.storage.getString(key)
         if (value == null || value.isEmpty()) {
             this.write(key, defaultValue)
-            return defaultValue
-        }
-        return value
-    }
-
-    fun read(key: String?, defaultValue: Boolean): String {
-        val value = this.storage.getBoolean(key)
-        if (value == null) {
-            this.storage.setBoolean(key, defaultValue)
-            return defaultValue
-        }
-        return value
-    }
-
-    fun read(key: String?, defaultValue: Int): String {
-        val value = this.storage.getInteger(key)
-        if (value == null) {
-            this.storage.setInteger(key, defaultValue)
             return defaultValue
         }
         return value
@@ -81,15 +63,15 @@ class Settings(api: MontoyaApi) {
         this.storage.setInteger(key, value)
     }
 
-//    val fingerprints: Array<String?>
-//        get() = ServerLibrary.INSTANCE.GetFingerprints().split("\n")
+    val fingerprints: List<String>
+        get() = getFingerprints()
 
     fun toTransportConfig(): TransportConfig {
-        val transportConfig: TransportConfig = TransportConfig()
+        val transportConfig = TransportConfig()
         transportConfig.Fingerprint = this.fingerprint
         transportConfig.HexClientHello = this.hexClientHello
-        transportConfig.HttpTimeout = this.httpTimeout
-        transportConfig.UseInterceptedFingerprint = this.useInterceptedFingerprint
+        transportConfig.HttpTimeout = 30
+        transportConfig.UseInterceptedFingerprint = false
         transportConfig.BurpAddr = this.burpProxyAddress
         transportConfig.InterceptProxyAddr = this.interceptProxyAddress
         return transportConfig

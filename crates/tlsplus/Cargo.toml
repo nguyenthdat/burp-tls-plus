@@ -13,7 +13,10 @@ crate-type = ["cdylib"]
 name = "tlsplus"
 
 [dependencies]
+serde_json.workspace = true
 tokio = { workspace = true, features = ["full"] }
 tokio-macros = "2.6.0"
 uniffi = { workspace = true, features = ["bindgen", "tokio"] }
 wreq = { workspace = true, features = ["apple-network-device-binding", "cookies-multiple", "cookies-preserve-order", "full", "hickory-dns", "http2-tracing", "internal_proxy_sys_no_cache", "multipart", "native-roots", "websocket"] }
+wreq-util = { workspace = true, features = ["emulation-serde", "full"] }
+strum = "0.27.2"
