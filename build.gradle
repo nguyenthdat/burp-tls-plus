@@ -1,0 +1,92 @@
+plugins {
+    id('java')
+    id("org.jetbrains.kotlin.jvm") version "2.2.20"
+}
+
+
+group = 'io.bitbytelab'
+version = '0.1.0'
+
+def osName = System.getProperty("os.name").toLowerCase()
+def isWindows = osName.contains("win")
+def isMac = osName.contains("mac")
+
+ext {
+    libBaseName = 'tlsplus'
+    rustProjectDir = project.hasProperty('rustProjectDir') ? file(project.property('rustProjectDir')) : project.projectDir
+    nativeTargetDir = new File(rustProjectDir, 'target/release')
+    generatedKotlinDir = file("src/main/kotlin/")
+}
+
+def libFileName = (isWindows ? "${libBaseName}.dll" : (isMac ? "lib${libBaseName}.dylib" : "lib${libBaseName}.so"))
+def libPath = new File(nativeTargetDir, libFileName)
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java', 'src/main/kotlin'
+        }
+        resources {
+            srcDirs 'src/main/resources'
+        }
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    mavenLocal()
+}
+
+dependencies {
+    implementation 'net.portswigger.burp.extensions:montoya-api:2025.8' // Burp API
+    implementation 'net.java.dev.jna:jna:5.17.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+    implementation 'com.fifesoft:rsyntaxtextarea:3.6.0'
+}
+
+// Build the Rust native library in release mode
+tasks.register('cargoBuildRelease', Exec) {
+    workingDir rustProjectDir
+    commandLine 'cargo', 'build', '--release'
+}
+
+tasks.register('generateUniFFI', Exec) {
+    dependsOn 'cargoBuildRelease'
+    workingDir rustProjectDir
+    doFirst {
+        commandLine 'cargo', 'run', '-p', 'uniffi-bindgen', '--',
+                    'generate', '--library', libPath.absolutePath,
+                    '--language', 'kotlin', '--out-dir', generatedKotlinDir.absolutePath, '--no-format'
+
+    }
+}
+
+// Make sure generated Kotlin sources are compiled
+tasks.named('compileKotlin') {
+    dependsOn 'generateUniFFI'
+}
+
+
+tasks.register('copyNativeLib', Copy) {
+    dependsOn 'cargoBuildRelease'
+    from nativeTargetDir
+    include libFileName
+    into "${layout.buildDirectory.get()}/libs"
+}
+
+tasks.register('fatJar', Jar) {
+    dependsOn 'copyNativeLib'
+    archiveBaseName.set('tlsplus-all')
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    from("${layout.buildDirectory.get()}/libs") {
+        include libFileName
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    with jar
+}

@@ -1,0 +1,16 @@
+[package]
+name = "tlsplus"
+edition.workspace = true
+version.workspace = true
+authors.workspace = true
+license.workspace = true
+description.workspace = true
+repository.workspace = true
+keywords.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+name = "tlsplus"
+
+[dependencies]
+uniffi = { workspace = true, features = ["bindgen", "tokio"] }
