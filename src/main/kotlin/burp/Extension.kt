@@ -4,7 +4,7 @@ import burp.api.montoya.BurpExtension
 import burp.api.montoya.MontoyaApi
 
 @Suppress("unused")
-class BurpExtender : BurpExtension {
+class Extension : BurpExtension {
     private lateinit var apiRef: MontoyaApi
 
     override fun initialize(api: MontoyaApi?) {

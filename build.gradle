@@ -47,7 +47,7 @@ dependencies {
     implementation 'net.portswigger.burp.extensions:montoya-api:2025.8' // Burp API
     implementation 'net.java.dev.jna:jna:5.17.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
-    implementation 'com.fifesoft:rsyntaxtextarea:3.6.0'
+    implementation 'com.intellij:forms_rt:7.0.3'
 }
 
 // Build the Rust native library in release mode

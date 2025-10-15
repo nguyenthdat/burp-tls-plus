@@ -9,7 +9,7 @@ repository = "https://github.com/nguyenthdat/burp-tls-plus"
 version = "0.1.0"
 edition = "2024"
 authors = ["Dat Nguyen <nguynethdat@outlook.com>"]
-keywords = ["tls", "burp", "ja3", "fingerprint", "bypass", "waf", "spoof"]
+keywords = ["tls", "burp", "ja3", "ja4", "fingerprint", "bypass", "waf", "spoof"]
 
 [workspace.dependencies]
 uniffi = { version = "0.30", features = ["bindgen", "tokio"] }
