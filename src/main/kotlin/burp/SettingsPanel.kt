@@ -20,7 +20,7 @@ import javax.swing.text.Document
  * - Inline validation (field border + help text)
  * - Reasonable max width, scrollable when needed
  */
-class SettingsTab(private val settings: Settings) : JPanel(BorderLayout()), SettingsPanel {
+class SettingsPanel(private val settings: Settings) : JPanel(BorderLayout()), SettingsPanel {
 
     // --- General controls ---
     private val listenField = JTextField()

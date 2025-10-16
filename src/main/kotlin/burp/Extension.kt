@@ -2,13 +2,9 @@ package burp
 
 import burp.api.montoya.BurpExtension
 import burp.api.montoya.MontoyaApi
-import burp.api.montoya.extension.ExtensionUnloadingHandler
-import burp.api.montoya.http.HttpService
 import burp.api.montoya.proxy.http.InterceptedRequest
 import burp.api.montoya.proxy.http.ProxyRequestToBeSentAction
 import com.google.gson.Gson
-import java.net.URI
-import java.nio.charset.StandardCharsets
 import uniffi.tlsplus.stopServer
 
 @Suppress("unused")
@@ -36,7 +32,7 @@ class Extension : BurpExtension {
             }
         }
 
-        api.userInterface().registerSuiteTab("TLS+", SettingsTab(settings))
+        api.userInterface().registerSettingsPanel (SettingsPanel(settings))
 
 //        Thread(Runnable {
 //            val err: Unit /* TODO: class org.jetbrains.kotlin.nj2k.types.JKJavaNullPrimitiveType */? =

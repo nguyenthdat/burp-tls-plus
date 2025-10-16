@@ -5,7 +5,7 @@ use strum::VariantArray;
 
 #[uniffi::export]
 pub fn get_fingerprints()-> Vec<String> {
-    Emulation::VARIANTS.iter().map(|e| format!("{:?}", e)).collect()
+    Emulation::VARIANTS.iter().map(|e| serde_json::to_string(e).unwrap()).collect()
 }
 
 #[uniffi::export]
